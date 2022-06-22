@@ -205,15 +205,15 @@ class HWCNTAccesor:
         #     self._percObj.computeHDN()
         return self._percObj.hdn
     
-    def copy(self):
-        obj2 = HWCNTAccesor(self._obj)
-        obj2.setParameters(base_period = self._percObj.base_period,
-                          window = self._percObj.window,
-                          perc = self._percObj.perc)
-        obj2.setThres(self._percObj.threshold)
-        obj2._percObj.percentile = self._percObj.percentile
-        obj2._percObj.hdn = self._percObj.hdn
-        return obj2
+    # def copy(self):
+    #     obj2 = HWCNTAccesor(self._obj)
+    #     obj2.setParameters(base_period = self._percObj.base_period,
+    #                       window = self._percObj.window,
+    #                       perc = self._percObj.perc)
+    #     obj2.setThres(self._percObj.threshold)
+    #     obj2._percObj.percentile = self._percObj.percentile
+    #     obj2._percObj.hdn = self._percObj.hdn
+    #     return obj2
     
     def WatchMat(self,**kwargs):
         if kwargs:
