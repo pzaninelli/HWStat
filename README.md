@@ -77,4 +77,3 @@ and then we get the exceedance
 ex = t2m.HWCNT.exceedance()
 ```
 
-However, the last computation is only 
