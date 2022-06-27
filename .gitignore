@@ -1,0 +1,6 @@
+old/
+.spyproject
+.Rhistory
+.ipynb_checkpoints
+src/.ipynb_checkpoints/
+src/HW_detection_PGZG.py

@@ -244,19 +244,22 @@ class HWCNTAccesor:
             WM = self.WatchMat()
         WM_diff = WM.diff(self._time)
         id_HW = xr.where(WM_diff==-1,0,WM_diff)
-        HWF_tot = id_HW.sum(dim=self._time)
         if group_by is None:
-            HWF = HWF_tot
+            HWF = id_HW.sum(dim=self._time)
         elif isinstance(group_by,str):
             assert group_by in ("month","season","year"), "'group_by' must be 'month','season' or 'year'"
             if group_by == "month":
-                HWF = id_HW.resample({self._time:"MS"}).sum(dim=self._time)/HWF_tot
+                HWF = id_HW.resample({self._time:"MS"}).sum(dim=self._time)
+                HWF.attrs["Units"] = "HW/month"
             elif group_by == "season":
-                HWF = id_HW.resample({self._time:"QS-DEC"}).sum(dim=self._time)/HWF_tot
+                HWF = id_HW.resample({self._time:"QS-DEC"}).sum(dim=self._time)
+                HWF.attrs["Units"] = "HW/season"
             else: # year
-                HWF = id_HW.resample({self._time:"AS"}).sum(dim=self._time)/HWF_tot    
+                HWF = id_HW.resample({self._time:"AS"}).sum(dim=self._time)    
+                HWF.attrs["Units"] = "HW/year"
         elif isinstance(group_by,int):
             HWF = id_HW.resample({self._time:str(group_by)+'D'}).sum(dim=self._time)
+            HWF.attrs["Units"] = f"HW/{group_by} days"
         else:
             raise AttributeError("'group_by' must be 'month','season' or 'year' or an integer of days to group by")
         HWF.name = "HWF"
@@ -272,19 +275,23 @@ class HWCNTAccesor:
             WM = self.WatchMat_C()
         WM_diff = WM.diff(self._time)
         id_HW = xr.where(WM_diff==-1,0,WM_diff)
-        HWF_tot = id_HW.sum(dim=self._time)
         if group_by is None:
-            HWF = HWF_tot
+            HWF = id_HW.sum(dim=self._time)
+            HWF.attrs["Units"] = "HW"
         elif isinstance(group_by,str):
             assert group_by in ("month","season","year"), "'group_by' must be 'month','season' or 'year'"
             if group_by == "month":
-                HWF = id_HW.resample({self._time:"MS"}).sum(dim=self._time)/HWF_tot
+                HWF = id_HW.resample({self._time:"MS"}).sum(dim=self._time)
+                HWF.attrs["Units"] = "HW/month"
             elif group_by == "season":
-                HWF = id_HW.resample({self._time:"QS-DEC"}).sum(dim=self._time)/HWF_tot
+                HWF = id_HW.resample({self._time:"QS-DEC"}).sum(dim=self._time)
+                HWF.attrs["Units"] = "HW/season"
             else: # year
-                HWF = id_HW.resample({self._time:"AS"}).sum(dim=self._time)/HWF_tot    
+                HWF = id_HW.resample({self._time:"AS"}).sum(dim=self._time)    
+                HWF.attrs["Units"] = "HW/year"
         elif isinstance(group_by,int):
             HWF = id_HW.resample({self._time:str(group_by)+'D'}).sum(dim=self._time)
+            HWF.attrs["Units"] = f"HW/{group_by} days"
         else:
             raise AttributeError("'group_by' must be 'month','season' or 'year' or an integer of days to group by")
         HWF.name = "HWF"
