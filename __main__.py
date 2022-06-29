@@ -48,7 +48,7 @@ __TMIN, __TMAX = "T2min", "T2max"
 def set_parameters_from_ini(filename = options.file):
     return ParamsInit.from_file(filename)
 
-def save_files(variable = str(),path = options.output,**args):
+def save_files(variable = str(),path = os.getcwd(),**args):
     assert args, "'args' must be defined!"
     assert path_exists(path), f"{path} does not exist!"
     if not path.endswith('/'): path = path + '/'
