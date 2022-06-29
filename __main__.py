@@ -93,6 +93,9 @@ def computeIndices(Array,Params, minmaxvar):
         exceedance = Exceedance(arr)
         persistence = Persistence(arr)
     else: # C modules activated!
+        print("****************************")
+        print("****Using cython modules****")
+        print("****************************")
         HWF_yearly, HWF_seasonal, HWF_monthly = HWF_C(arr)
         HWA_yearly, HWA_seasonal, HWA_monthly = HWA_C(arr)
         HWM_yearly, HWM_seasonal, HWM_monthly = HWM_C(arr)
