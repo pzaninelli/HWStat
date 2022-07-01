@@ -36,10 +36,11 @@ def preproc(arr, params, minmax = "T2max", maskfile = None):
         arr = arr.HWCNT.dailymax()
     else:
         arr = arr.HWCNT.dailymin()
+    arr = arr.HWCNT.convertLon() # convert longitude
     if maskfile is not None: # apply ocean mask?
         mask = xr.open_dataarray(maskfile)
+        mask = mask.HWCNT.convertLon()
         arr = arr.HWCNT.applyMask(mask[0])
-    arr = arr.HWCNT.convertLon() # convert longitude
     arr = arr.sortby(params.dim_names["longitude"])
     return arr
 
@@ -118,6 +119,38 @@ def HWF_C(arr, base_period = {}, window = None, prec = None, thres = None):
     hwf_seas = arr.HWCNT.HWF_C("season")
     hwf_mon = arr.HWCNT.HWF_C("month")
     return (hwf_y, hwf_seas, hwf_mon)
+
+def Percentile(arr, base_period = {}, window = None, prec = None, thres = None):
+    """
+    Compute HeatWave Frequency
+
+    Parameters
+    ----------
+    arr : DataArray
+        Input Array.
+    base_period : dict, optional
+        Period to compute the percentile. The default is {}.
+    window : int, optional
+        Window to compute percentile. The default is None.
+    prec : int, optional
+        prec(th) percentile. The default is None.
+    thres : int, optional
+        Threshold of persistence in hot days. The default is None.
+
+    Returns
+    -------
+    percentile : DataArray
+        Percentile array
+
+    """
+    if base_period and window is not None and prec is not None and thres is not None:
+        arr.HWCNT.setParameters(base_period = base_period,
+                             window= window,
+                             prec = prec)
+        arr.HWCNT.threshold = thres
+        arr.HWCNT.computeHDN
+    percentile = arr.HWCNT.getPercentile()
+    return percentile
 
 def Exceedance(arr, base_period = {}, window = None, prec = None, thres = None):
     if base_period and window is not None and prec is not None and thres is not None:
