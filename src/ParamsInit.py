@@ -9,8 +9,8 @@ from configparser import ConfigParser
 import os
 from os.path import exists as path_exists
 import os.path
-import xarray as xr
-
+# import xarray as xr
+from netCDF4 import Dataset, num2date
 
 
 
@@ -88,14 +88,14 @@ class ParamsInit:
             self._var = var
         
         if start_year_clim is None:
-            self._start_year_clim = self._get_StartEnd_dates(self._dir_in)["startYear"]
+            self._start_year_clim = self._get_StartEnd_dates(self.dir_in)["pStartYear"]
         elif not isinstance(start_year_clim, int):
             raise AttributeError(f"{start_year_clim} should be an 'integer'!")
         else:
             self._start_year_clim = start_year_clim
         
         if end_year_clim is None:
-            self._end_year_clim = self._get_StartEnd_dates(self._dir_in)["endYear"]
+            self._end_year_clim = self._get_StartEnd_dates(self.dir_in)["pEndYear"]
         elif not isinstance(end_year_clim, int):
             raise AttributeError(f"{end_year_clim} should be an 'integer'!")
         else:
@@ -124,12 +124,21 @@ class ParamsInit:
         self._file_out = self._set_file_out(file_out,self._var,
                                             self._start_year_clim,
                                             self._end_year_clim)
-        self._percentile_thres = percentile_thres
-        self._persistence_hw = persistence_hw
+        if percentile_thres is None:
+            raise ValueError("Percentile threshold values must be set")
+        else:
+            self._percentile_thres = percentile_thres
+        if persistence_hw is None:
+                raise ValueError("Persistence to compute hw must be set")
+        else:
+            self._persistence_hw = persistence_hw
         self._save_tmp_files = save_tmp_files 
         self._op_mon_seas = op_mon_seas 
         self._op_rolling = op_rolling 
-        self._window_width = window_width
+        if window_width is None:
+            raise ValueError("the window width to compute percentile must be set")
+        else:
+            self._window_width = window_width
         
     def __str__(self) -> str:
             return f"""
@@ -245,25 +254,42 @@ class ParamsInit:
         Get date, day, month and year. 
         Inspired by 
         https://stackoverflow.com/questions/13648774/get-year-month-or-day-from-numpy-datetime64
+        To compute the percentile period I consider the half of whole period.
         """
-        data = xr.open_dataset(filename)
-        date_min = (data[time_var_name].min()).values
-        date_max = (data[time_var_name].max()).values
-        startYear = date_min.astype('datetime64[Y]').astype(int) + 1970
-        endYear = date_max.astype('datetime64[Y]').astype(int) + 1970
-        startMonth = date_min.astype('datetime64[M]').astype(int) % 12 + 1
-        endMonth = date_max.astype('datetime64[M]').astype(int) % 12 + 1
-        startDay = int(date_min.astype('datetime64[D]').astype(str).split('-')[2])
-        endDay = int(date_max.astype('datetime64[D]').astype(str).split('-')[2])
-        return {"startDate" : date_min,
-                "endDate" : date_max,
-                "startYear" : startYear, 
-                "endYear": endYear,
-                "startMonth" : startMonth,
-                "endMonth" : endMonth,
-                "startDay" : startDay,
-                "endDay" : endDay}
-    
+        # data = xr.open_dataset(filename)
+        # date_min = (data[time_var_name].min()).values
+        # date_max = (data[time_var_name].max()).values
+        # startYear = date_min.astype('datetime64[Y]').astype(int) + 1970
+        # endYear = date_max.astype('datetime64[Y]').astype(int) + 1970
+        # startMonth = date_min.astype('datetime64[M]').astype(int) % 12 + 1
+        # endMonth = date_max.astype('datetime64[M]').astype(int) % 12 + 1
+        # startDay = int(date_min.astype('datetime64[D]').astype(str).split('-')[2])
+        # endDay = int(date_max.astype('datetime64[D]').astype(str).split('-')[2])
+        # return {"startDate" : date_min,
+        #         "endDate" : date_max,
+        #         "startYear" : startYear, 
+        #         "endYear": endYear,
+        #         "startMonth" : startMonth,
+        #         "endMonth" : endMonth,
+        #         "startDay" : startDay,
+        #         "endDay" : endDay}
+        date_dict = {}
+        with Dataset(filename) as nc:
+            time = nc.variables[time_var_name]
+            time0 = num2date(time[0], time.units)
+            timef = num2date(time[-1], time.units)
+            date_dict["startDate"] = time0.strftime('%Y-%m-%d')
+            date_dict["endDate"] = timef.strftime('%Y-%m-%d')
+            date_dict["startYear"] = time0.year
+            date_dict["pStartYear"] = time0.year
+            date_dict["endYear"] = timef.year
+            date_dict["pEndYear"] = time0.year + round((timef.year-time0.year)/2)
+            date_dict["startMonth"] = time0.month
+            date_dict["endMonth"] = timef.month
+            date_dict["startDay"] = time0.day
+            date_dict["endDay"] = timef.day
+        return date_dict
+   
     @staticmethod
     def _get_main_var(filename):
         """
@@ -280,13 +306,12 @@ class ParamsInit:
             Main Variables' names.
 
         """
-        data = xr.open_dataset(filename)
-        ndim_variables = {}
-        for key, value in data.items():
-            ndim_variables[key] = len(data[key].dims)
-        
-        return [key for key, value in ndim_variables.items() \
-                if value == max(ndim_variables.values())]
+        with Dataset(filename) as nc:
+            mvars = set(nc.variables.keys()).difference(nc.dimensions.keys())
+            if not len(mvars) == 1:
+                raise AttributeError('ERROR:: the file only must have one main variable')
+            mvar = mvars.pop()
+        return mvar
     
     @staticmethod
     def _get_dims_len(filename, dim_names):
@@ -306,12 +331,12 @@ class ParamsInit:
             lenght of each dimension.
 
         """
-        data = xr.open_dataset(filename)
-        return {
-            "longitude": len(data[dim_names["longitude"]]),
-            "latitude" : len(data[dim_names["latitude"]]),
-            "time" : len(data[dim_names["time"]])
-            }
+        dim_dict = {}
+        with Dataset(filename) as nc:
+            dim_dict["longitude"] = nc.dimensions.get(dim_names["longitude"]).size
+            dim_dict["latitude"] = nc.dimensions.get(dim_names["latitude"]).size
+            dim_dict["time"] = nc.dimensions.get(dim_names["time"]).size
+        return dim_dict
 
     @classmethod
     def from_file(cls, filepath):
@@ -334,27 +359,68 @@ class ParamsInit:
         config = ConfigParser()
         config.read(filepath)
         params = config["PARAMETERS"]
+        if params["StartYearClim"]=='':
+            startyearclim = None
+        elif isinstance(params["StartYearClim"], str):
+            try:
+                startyearclim = int(params["StartYearClim"])
+            except ValueError:
+                print("StartYearClim must be an integer")
+                
+        if params["EndYearClim"]=='':
+            endyearclim = None
+        elif isinstance(params["EndYearClim"], str):
+             try:
+                 endyearclim = int(params["EndYearClim"])
+             except ValueError:
+                 print("EndYearClim must be an integer")
+                 
+        if params["PercentileThreshold"]=='':
+            percthres = None
+        elif isinstance(params["PercentileThreshold"], str):
+             try:
+                 percthres = int(params["PercentileThreshold"])
+             except ValueError:
+                 print("PercentileThreshold must be an integer")
+                 
+        if params["PersistenceThreshold"]=='':
+            persisthres = None
+        elif isinstance(params["PersistenceThreshold"], str):
+             try:
+                 persisthres = int(params["PersistenceThreshold"])
+             except ValueError:
+                 print("PersistenceThreshold must be an integer")         
+        
+        if params["WindowWidth"]=='':
+            winwidth = None
+        elif isinstance(params["WindowWidth"], str):
+             try:
+                 winwidth = int(params["WindowWidth"])
+             except ValueError:
+                 print("WindowWidth must be an integer") 
+        
         return cls(params["FileIN"],
                    params["Variable"].split(","),
                    params["NameVarNCFile"].split(","),
                    params["LonName"],
                    params["LatName"],
                    params["TimeName"],
-                   int(params["StartYearClim"]),
-                   int(params["EndYearClim"]),
+                   startyearclim,
+                   endyearclim,
                    params.getboolean("OceanMask?"),
                    params["OceanMaskFile"],
                    params["DirOUT"],
                    params["FileOut"],
-                   int(params["PercentileThreshold"]),
-                   int(params["PersistenceThreshold"]),
+                   percthres,
+                   persisthres,
                    params.getboolean("SaveTempFiles?"),
                    params.getboolean("ComputeMonthlySeasStat?"),
                    params.getboolean("ComputeRollingStats?"),
-                   int(params["WindowWidth"])
+                   winwidth
                    )
     
 
 
 if __name__ == "__main__":
-    parameters = ParamsInit.from_file("/home/pzaninelli/TRABAJO/IGEO/HWDetectionAlgorithm/parameters/params.ini")
+    parameters = ParamsInit.from_file("/home/pzaninelli/TRABAJO/IGEO/HWStat/parameters/params.ini")
+    print(parameters)
