@@ -87,6 +87,7 @@ def computeIndices(Array,Params, minmaxvar):
     arr = preproc(Array,Params, minmax=minmaxvar, maskfile=Params.file_mask)
     set_HW_parameters(arr, Params)
     if not options.cmods: # C modules not activated
+        percentile = Percentile(arr)
         HWF_yearly, HWF_seasonal, HWF_monthly = HWF(arr)
         HWA_yearly, HWA_seasonal, HWA_monthly = HWA(arr)
         HWM_yearly, HWM_seasonal, HWM_monthly = HWM(arr)
@@ -96,6 +97,7 @@ def computeIndices(Array,Params, minmaxvar):
         print("****************************")
         print("****Using cython modules****")
         print("****************************")
+        percentile = Percentile(arr)
         HWF_yearly, HWF_seasonal, HWF_monthly = HWF_C(arr)
         HWA_yearly, HWA_seasonal, HWA_monthly = HWA_C(arr)
         HWM_yearly, HWM_seasonal, HWM_monthly = HWM_C(arr)
@@ -114,7 +116,7 @@ def computeIndices(Array,Params, minmaxvar):
                HWM_MONTHLY=HWM_monthly)
     save_files_var(EXCEEDANCE=exceedance)
     save_files_var(PERSISTENCE=persistence)
-
+    save_files_var(PERCENTILE = percentile)
 
 def main():
     # reading prameters
