@@ -40,6 +40,7 @@ def preproc(arr, params, minmax = "T2max", maskfile = None):
     if maskfile is not None: # apply ocean mask?
         mask = xr.open_dataarray(maskfile)
         mask = mask.HWCNT.convertLon()
+        mask = mask.sortby(params.dim_names["longitude"])
         arr = arr.HWCNT.applyMask(mask[0])
     arr = arr.sortby(params.dim_names["longitude"])
     return arr
