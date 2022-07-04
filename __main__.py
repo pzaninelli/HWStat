@@ -125,8 +125,8 @@ def main():
     should_continue = confirmation()
     if not should_continue:
         sys.exit(0) 
-    arr = xr.open_dataarray(params.dir_in,chunks={params.dim_names["longitude"]:25,
-                                                  params.dim_names["latitude"]:25})
+    arr = xr.open_dataarray(params.dir_in,chunks={params.dim_names["longitude"]:50,
+                                                  params.dim_names["latitude"]:50})
     if params.variable[0] in (__TMAX,__TMIN):
         computeIndices(arr, params, params.variable[0])
     else:
