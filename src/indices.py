@@ -29,7 +29,9 @@ def preproc(arr, params, minmax = "T2max", maskfile = None):
         Preprocessed DataArray.
 
     """
-    
+    print("*****************************")
+    print("*****Starting Preprocess*****")
+    print("*****************************")
     assert minmax in __OPT_TEMP, f"'minmax' must be {__OPT_TEMP}"
     arr = arr.HWCNT.toCelsius() # transform to Celsius degree
     if minmax == "T2max": # compute daily maximum or minimum
@@ -43,6 +45,10 @@ def preproc(arr, params, minmax = "T2max", maskfile = None):
         mask = mask.sortby(params.dim_names["longitude"])
         arr = arr.HWCNT.applyMask(mask[0])
     arr = arr.sortby(params.dim_names["longitude"])
+    
+    print("*****************************")
+    print("********End Preprocess*******")
+    print("*****************************")
     return arr
 
 def HWF(arr, base_period = {}, window = None, prec = None, thres = None):
