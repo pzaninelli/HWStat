@@ -7,7 +7,7 @@ HeatWave Accesor for Xarray
 """
 
 from src.HDN import *
-from copy import deepcopy
+
                                                            
 @xr.register_dataarray_accessor("HWCNT")
 class HWCNTAccesor:
