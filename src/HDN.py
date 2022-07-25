@@ -232,7 +232,6 @@ class HDN(Percentile):
          print("Compute count HDN")
          anom = self.getAnom()
          Sign = xr.where(np.sign(anom)==-1,0,np.sign(anom))    
-         # if not self._obj.chunksizes:
          self.hdn = xr.apply_ufunc(self._island_cumsum_vectorized, Sign.load(), 
                                    input_core_dims=[[self._time]],
                                    output_core_dims=[[self._time]],
@@ -331,46 +330,3 @@ class HDN(Percentile):
         arr2 = fillones(arr2,idp3_time,idp3_lat, idp3_lon)
         arr2 = arr.copy(data = arr2)
         return arr2
-    
-    # it does not work properly and shows poor performance
-    # @staticmethod
-    # def _countHDN_C_p(arr, thres):
-    #     arr2 = xr.zeros_like(arr)
-    #     arr2 = arr2.to_numpy()
-    #     id3 = np.argwhere(np.array(arr==thres))
-    #     id3_time = id3[:,0]
-    #     id3_time2 = id3_time-1
-    #     id3_time1 = id3_time2 -1
-    #     id3_lat = id3[:,1]
-    #     id3_lon = id3[:,2]
-    #     idp3 = np.argwhere(np.array(arr>thres))
-    #     idp3_time = idp3[:,0]
-    #     idp3_lat = idp3[:,1]
-    #     idp3_lon = idp3[:,2]
-    #     index1 = np.array([np.ravel_multi_index((time,lat,lon), arr2.shape) 
-    #               for time,lat,lon in zip(id3_time2,id3_lat, id3_lon)])
-    #     index2 = np.array([np.ravel_multi_index((time,lat,lon), arr2.shape) 
-    #               for time,lat,lon in zip(id3_time1,id3_lat, id3_lon)])
-    #     index3 = np.array([np.ravel_multi_index((time,lat,lon), arr2.shape) 
-    #               for time,lat,lon in zip(id3_time,id3_lat, id3_lon)])
-    #     index4 = np.array([np.ravel_multi_index((time,lat,lon), arr2.shape) 
-    #               for time,lat,lon in zip(idp3_time,idp3_lat, idp3_lon)])
-    #     arr2 = arr2.flatten()
-    #     arr2 = fillones_p(arr2,index1)
-    #     arr2 = fillones_p(arr2,index2)
-    #     arr2 = fillones_p(arr2,index3)
-    #     arr2 = fillones_p(arr2,index4)
-    #     arr2 = arr2.reshape(arr.shape[0],arr.shape[1],arr.shape[2])
-    #     arr2 = arr.copy(data = arr2)
-    #     return arr2
-    
-# performance    
-    # %timeit WM_C = _countHDN_C(hdn,thres)
-
-    # Output from spyder call 'get_namespace_view':
-
-    # Output from spyder call 'get_namespace_view':
-    # 132 ms ± 202 µs per loop (mean ± std. dev. of 7 runs, 10 loops each)
-
-    # %timeit WM = _countHDN(hdn,thres)
-    # 1min 39s ± 316 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
