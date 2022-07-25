@@ -1,14 +1,9 @@
 # HWStat
+This program computes several statistics of heatwaves. An event of heatwave is defined as a period of consecutive hot days/nights. A hot day/night in which day/night the maximum/minimum temperature is above a specific threshold (percentile). This percentile, which is calculated with a moving window of days centered on each day of year, and the minimum duration (in days) required to define a heatwave are user-defined.
 
-This program compute statistics of heatwaves. These statistics are: the persistence 
-(**PERSISTENCE**) of hot days/nights (depending on whether the computation is on maximum 
-or minimum temperature), the exceedance (**EXCEEDANCE**) that contains the 0 for time steps
-that do not belong to a heatwave event and the daily temperature for those that do.
-the heatwave frequency (**HWF**), the heatwave longest spell (**HWD**), 
-daily peak exceedance (**HWA**) and the cumulative exceedence (**HWM**).
+The metrics are calculated (accumulated) over a specific period (month, season, year or a certain number of days). Then, the output are time series are the following parameters: *the heatwave frequency* (**HWF**, number of days in the predefined period with HW conditions), *the longest spell* (**HWD**, the longest duration with consecutive days in HW conditions), *the heatwave amplitude* (**HWA**, the maximum recorded exceedence value for the considered period) and *the heatwave magnitude* (**HWM**, the cumulative exceedence for the considered period). 
 
-The output of this program are netCDF files with each of the above-mentioned indexes
-computed calculated at different frequencies: monthly, seasonal and annual.
+This program saves the output in netcdf format for all the above-mentioned indexes and for three frequencies: monthly, seasonal and annual.
 
 
 To pass the arguments to the program, you have to fill in a *.ini* located at
