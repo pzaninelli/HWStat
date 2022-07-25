@@ -28,9 +28,6 @@ query_opts=OptionGroup(parser,'Query Options',"These options control the query m
 query_opts.add_option("-p", "--params", dest="file", action="store",
     default="parameters/params.ini", help=".ini file to take the parameters")
 
-# query_opts.add_option("-o", "--output", dest="output", action="store",
-#     default = os.getcwd(), help="path of the output files, e.g. /home/CLINT/")
-
 # use C versions of the functions
 parser.add_option("-C", "--cmods",
                   action="store_true", dest="cmods", default=False,
@@ -92,7 +89,7 @@ def computeIndices(Array,Params, minmaxvar):
         HWA_yearly, HWA_seasonal, HWA_monthly = HWA(arr)
         HWM_yearly, HWM_seasonal, HWM_monthly = HWM(arr)
         exceedance = Exceedance(arr)
-        persistence = Persistence(arr)
+        # persistence = Persistence(arr)
     else: # C modules activated!
         print("****************************")
         print("****Using cython modules****")
@@ -102,7 +99,7 @@ def computeIndices(Array,Params, minmaxvar):
         HWA_yearly, HWA_seasonal, HWA_monthly = HWA_C(arr)
         HWM_yearly, HWM_seasonal, HWM_monthly = HWM_C(arr)
         exceedance = Exceedance_C(arr)
-        persistence = Persistence(arr)
+        # persistence = Persistence(arr)
     save_files_var = partial(save_files, variable = minmaxvar,
                              path = Params.dir_out)
     save_files_var(HWF_YEARLY=HWF_yearly, 
@@ -115,7 +112,7 @@ def computeIndices(Array,Params, minmaxvar):
                HWM_SEASONAL=HWM_seasonal, 
                HWM_MONTHLY=HWM_monthly)
     save_files_var(EXCEEDANCE=exceedance)
-    save_files_var(PERSISTENCE=persistence)
+    # save_files_var(PERSISTENCE=persistence)
     save_files_var(PERCENTILE = percentile)
 
 def main():
