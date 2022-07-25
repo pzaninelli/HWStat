@@ -8,6 +8,8 @@ Functions for calculating heat wave indices
 
 from src.HWAccesor import *
 
+import xarray as xr
+
 __OPT_TEMP = ("T2max","T2min")
 
 def preproc(arr, params, minmax = "T2max", maskfile = None):
@@ -39,6 +41,7 @@ def preproc(arr, params, minmax = "T2max", maskfile = None):
     else:
         arr = arr.HWCNT.dailymin()
     arr = arr.HWCNT.convertLon() # convert longitude
+    arr = arr.sortby(params.dim_names["longitude"])
     if maskfile is not None: # apply ocean mask?
         mask = xr.open_dataarray(maskfile)
         mask = mask.HWCNT.convertLon()
