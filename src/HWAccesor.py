@@ -6,7 +6,10 @@ HeatWave Accesor for Xarray
 @year: 2022
 """
 
-from src.HDN import *
+import xarray as xr
+import numpy as np
+import warnings
+from src.HDN import HDN
 
                                                            
 @xr.register_dataarray_accessor("HWCNT")
@@ -205,16 +208,6 @@ class HWCNTAccesor:
         #     self._percObj.computeHDN()
         return self._percObj.hdn
     
-    # def copy(self):
-    #     obj2 = HWCNTAccesor(self._obj)
-    #     obj2.setParameters(base_period = self._percObj.base_period,
-    #                       window = self._percObj.window,
-    #                       perc = self._percObj.perc)
-    #     obj2.setThres(self._percObj.threshold)
-    #     obj2._percObj.percentile = self._percObj.percentile
-    #     obj2._percObj.hdn = self._percObj.hdn
-    #     return obj2
-    
     def WatchMat(self,**kwargs):
         if kwargs:
             base_period, window, perc = self._split_kwargs(kwargs)
@@ -302,10 +295,12 @@ class HWCNTAccesor:
        print("Computing exceedance...")
        if kwargs:
            wm = self.WatchMat(**kwargs)
+           anom = self.getAnomaly(**kwargs)
        else:
            wm = self.WatchMat()
+           anom = self.getAnomaly()
        print("exceedance computed!")
-       ex = xr.where(wm == 1, self._obj, 0)
+       ex = xr.where(wm == 1, anom, 0)
        ex.name = "Exceedance"
        return ex
     
@@ -448,7 +443,7 @@ class HWCNTAccesor:
         if kwargs:
             # base_period, window, perc = self._split_kwargs(kwargs)
             hwf = self.HWF(group_by,**kwargs)
-            WM1 = self.WatchMat(**kargs)
+            WM1 = self.WatchMat(**kwargs)
             if group_by is None:
                 WM = WM1.sum(dim=self._time)
             elif isinstance(group_by, str):
@@ -490,7 +485,7 @@ class HWCNTAccesor:
         if kwargs:
             # base_period, window, perc = self._split_kwargs(kwargs)
             hwf = self.HWF_C(group_by,**kwargs)
-            WM1 = self.WatchMat_C(**kargs)
+            WM1 = self.WatchMat_C(**kwargs)
             if group_by is None:
                 WM = WM1.sum(dim=self._time)
             elif isinstance(group_by, str):
@@ -537,7 +532,3 @@ class HWCNTAccesor:
             if opt == "perc":
                 perc = value
         return base_period, window, perc
-    
-    
-    # @staticmethod
-    # def 
