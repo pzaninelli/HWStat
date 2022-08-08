@@ -1,9 +1,13 @@
 # HWStat
-This program computes several statistics of heatwaves. An event of heatwave is defined as a period of consecutive hot days/nights. A hot day/night in which day/night the maximum/minimum temperature is above a specific threshold (percentile). This percentile, which is calculated with a moving window of days centered on each day of year, and the minimum duration (in days) required to define a heatwave are user-defined.
+This program computes several statistics of heatwaves.
 
-The metrics are calculated (accumulated) over a specific period (month, season, year or a certain number of days). Then, the output are time series are the following parameters: *the heatwave frequency* (**HWF**, number of days in the predefined period with HW conditions), *the longest spell* (**HWD**, the longest duration with consecutive days in HW conditions), *the heatwave amplitude* (**HWA**, the maximum recorded exceedence value for the considered period) and *the heatwave magnitude* (**HWM**, the cumulative exceedence for the considered period). 
+A heatwave is defined as an uninterrupted period with extreme temperatures above a given (percentile-based) threshold. This percentile, which is calculated locally with a running window centered on each day of year, and the minimum duration (in days) required to define a heatwave are user-defined. The definition can be applied to maximum temperature (hot days), minimum temperature (hot nights), or both (hot days and nights).
 
-This program saves the output in netcdf format for all the above-mentioned indexes and for three frequencies: monthly, seasonal and annual.
+The metrics are calculated (accumulated) over a specific time interval (month, season, year or a certain number of days defined by the user) and provided for the entire period. The output (spatial maps for each time interval of the considered period) includes the following parameters: the heatwave frequency (**HWF**, number of days with HW conditions), the longest spell (**HWD**, the longest HW event, in days), the heatwave amplitude (**HWA**, the largest daily temperature exceedance with respect to the considered percentile, in temperature units) and the heatwave magnitude (**HWM**, the cumulative exceedance over the considered time interval, i.e. an aggregated measure of HW frequency, duration and intensity based on the sum of daily temperature exceedances for all HW days, in temperature units).
+
+The input temperature file must be in netcdf format and in hourly frequency.
+
+This program saves the output in netcdf format for the above-mentioned indices and with the selected frequency (monthly, seasonal, annual,user-defined). The spatial domain and period are provided as in the input temperature data.
 
 
 To pass the arguments to the program, you have to fill in a *.ini* located at
